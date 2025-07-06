@@ -1,4 +1,4 @@
 {
-  "option":"display-tui",
-  "action": "~/src/rust/display-tui/"
+  "option":"printer-tui",
+  "action": "~/src/rust/printer-tui/"
 }

@@ -1,5 +1,5 @@
 use std::io;
-use crossterm::event::{self,Event,KeyCode,KeyEvent,KeyEventKind};
+use crossterm::event::{self,Event,KeyEvent,KeyEventKind};
 use ratatui::{
     buffer::Buffer,
     layout::Rect,
@@ -7,27 +7,26 @@ use ratatui::{
     DefaultTerminal,Frame,
 };
 use ratatui::prelude::*;
-mod edit;
-mod printers_list;
-mod printer;
+mod new_printer;
+mod printers;
+mod cups;
 mod utils;
-mod configuration;
 mod test_utils;
-use edit::Edit;
-use printers_list::PrintersList;
+use new_printer::Edit;
+use printers::Printers;
 
-use printer::{
-    Device,
+use cups::device::Device;
+use cups::printer::{
     Printer,
-    Driver,
+    get_all_printers,
 };
+use cups::driver::Driver;
 
 use utils::{
     TUIMode,
     EditBlock,
     EditMode,
 };
-use configuration::Configuration;
 
 fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
@@ -39,7 +38,6 @@ fn main() -> io::Result<()> {
 #[derive(Debug, Default)]
 pub struct App {
     exit:bool,
-    config: Configuration,
     printers: Vec<Printer>,
     devices: Vec<Device>,
     drivers: Vec<Driver>,
@@ -49,19 +47,16 @@ pub struct App {
     selected_edit_block: EditBlock,
     selected_edit_mode: EditMode,
     selected_printer_name: String,
-    // selected_scale: usize,
     mode: TUIMode,
 }
 
 impl App{
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
-        self.config = Configuration::get();
-        self.printers = Printer::get_all();
+        self.printers = get_all_printers();
         self.selected_printer= 0;
         self.selected_printer_name = self.printers.get(self.selected_printer)
             .map_or("No Printer".to_string(), |p| p.name.clone());
         self.mode = TUIMode::View;
-        // self.selected_monitor= 0;
         self.selected_edit_block = EditBlock::Title;
         self.selected_edit_mode = EditMode::View;
 
@@ -87,22 +82,15 @@ impl App{
     }
 
     fn handle_key_event(&mut self, key_event: KeyEvent) {
-        match key_event.code {
-            KeyCode::Char('q') => self.exit(),
-   //         KeyCode::Char('w') => self.write(), 
-            _ => {
-                match self.mode {
-                    TUIMode::View => PrintersList::handle_events(self,key_event),
-                    TUIMode::Edit => Edit::handle_events(self,key_event),
-                }
-            }
+        match self.mode {
+            TUIMode::View => Printers::handle_events(self,key_event),
+            TUIMode::Edit => Edit::handle_events(self,key_event),
         }
     }
-     
+
     fn exit(&mut self) {
         self.exit = true;
     }
-        
   
     fn change_mode(&mut self, mode: TUIMode) {
        self.mode = mode;
@@ -114,6 +102,7 @@ impl Widget for &App {
     fn render(self,area: Rect, buf: &mut Buffer) {
         let mut edit = Edit::new(
             self.selected_edit_block,
+            self.selected_edit_mode,
             &self.selected_printer_name, 
             &self.devices,
             &self.drivers,
@@ -121,10 +110,9 @@ impl Widget for &App {
             Some(self.selected_driver),
         );
 
-        let mut printers = PrintersList::new(
+        let mut printers = Printers::new(
             &self.printers,
-            self.mode,
-            Some(self.selected_printer), 
+            self.selected_printer, 
         );
         
         let outer_layout = Layout::default()
