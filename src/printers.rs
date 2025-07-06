@@ -4,7 +4,7 @@ use ratatui::{
     style::{Style,Stylize,Color},
     symbols::border,
     text::Line,
-    widgets::{Cell,Block,StatefulWidget,Row,Table,TableState},
+    widgets::{Cell,Block,StatefulWidget,Row,Table,TableState,Borders},
 };
 use ratatui::prelude::*;
 use ratatui::layout::Constraint;
@@ -57,6 +57,9 @@ impl<'a> Printers<'a> {
     }
 
     fn next_printer(app:&mut App) {
+        if app.printers.is_empty() {
+            return;
+        }
         app.selected_printer= if app.selected_printer>= app.printers.len() - 1 {
             0
         } else {
@@ -77,10 +80,10 @@ impl<'a> Printers<'a> {
     }
 
     fn add_printer(app:&mut App) {
-        app.printers.push(Printer::default()); 
-        app.selected_printer = app.printers.len() - 1;
-        app.selected_printer_name = app.printers.get(app.selected_printer)
-            .map_or("No Printer".to_string(), |p| p.name.clone());
+        app.selected_printer = 0;
+        app.selected_printer_name = "New Printer".to_string();
+        app.selected_device = 0;
+        app.selected_driver = 0;
         app.selected_edit_block = EditBlock::Title;
         app.selected_edit_mode = EditMode::View;
         app.devices = get_all_devices();
@@ -108,7 +111,14 @@ impl<'a> Printers<'a> {
             .collect()
     }
  
-    fn options_to_rows(&self) -> Vec<Row<'static>> {
+    fn options_to_rows(&mut self) -> Vec<Row<'static>> {
+        if self.printers.is_empty() {
+            return vec![];
+        }
+        if self.selected_printer >= self.printers.len() {
+            self.selected_printer = self.printers.len() - 1;
+        }
+        
         self.printers[self.selected_printer].options
             .iter()
             .map(|option| {
@@ -120,17 +130,7 @@ impl<'a> Printers<'a> {
             .collect()
     }   
 
-    pub fn render(&mut self, area: Rect, buf: &mut Buffer) {
-        let layout = Layout::default()
-                 .direction(Direction::Horizontal)
-                 .constraints(vec![
-                     Constraint::Percentage(50),
-                     Constraint::Percentage(50),
-                 ])
-                 .split(area);
-
-
-        let title = Line::from(if self.printers.len()>1 {" Printers "}else{" Printer "}.white().bold());
+    fn get_instructions(&self) -> Line<'static> {
         let mut instructions_items = vec![];
         instructions_items.push(" Up ".white());
         instructions_items.push("<k> ".blue().bold());
@@ -142,11 +142,31 @@ impl<'a> Printers<'a> {
         instructions_items.push("<d> ".blue().bold());
         instructions_items.push(" Quit ".white());
         instructions_items.push("<q> ".blue().bold());
-        let instructions = Line::from(instructions_items);
+        Line::from(instructions_items)
+    }
 
-        let block = Block::bordered()
-            .title(title.centered())
+    pub fn render(&mut self, area: Rect, buf: &mut Buffer) {
+        let instructions = self.get_instructions();
+        let edit_title = Line::from(" Printer TUI ".white().bold());
+        let edit_block = Block::default().borders(Borders::ALL)
+            .title(edit_title.centered())
             .title_bottom(instructions.centered())
+            .border_set(border::THICK);
+        let inner_area = edit_block.inner(area);
+        edit_block.render(area, buf);
+        let layout = Layout::default()
+                 .direction(Direction::Horizontal)
+                 .constraints(vec![
+                     Constraint::Percentage(50),
+                     Constraint::Percentage(50),
+                 ])
+                 .split(inner_area);
+
+
+        let title = Line::from(if self.printers.len()>1 {" Printers "}else{" Printer "}.white().bold());
+
+        let block = Block::default()
+            .title(title)
             .border_set(border::THICK)
             .border_style(Style::default().fg(Color::White));
 

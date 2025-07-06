@@ -32,13 +32,13 @@ pub struct Edit<'a> {
     pub driver_state: TableState,
     pub selected_block: EditBlock,
     pub selected_edit_mode: EditMode,
-    pub printer_name: &'a String,
+    pub printer_name: String,
     pub devices:&'a Vec<Device>,
     pub drivers: &'a Vec<Driver>,
 }
 
 impl<'a> Edit<'a> {
-    pub fn new( selected_block:EditBlock,selected_edit_mode:EditMode,printer_name:&'a String,devices: &'a Vec<Device>,drivers: &'a Vec<Driver>,selected_device:Option<usize>,selected_driver:Option<usize>) -> Self {
+    pub fn new( selected_block:EditBlock,selected_edit_mode:EditMode,devices: &'a Vec<Device>,drivers: &'a Vec<Driver>,selected_device:Option<usize>,selected_driver:Option<usize>,selected_printer_name:&'a String) -> Self {
         Edit{
             device_state: TableState::default()
                 .with_selected(selected_device),
@@ -46,7 +46,7 @@ impl<'a> Edit<'a> {
                 .with_selected(selected_driver),
             selected_block,
             selected_edit_mode,
-            printer_name,
+            printer_name: selected_printer_name.clone(),
             devices,
             drivers,
         }

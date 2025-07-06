@@ -103,11 +103,11 @@ impl Widget for &App {
         let mut edit = Edit::new(
             self.selected_edit_block,
             self.selected_edit_mode,
-            &self.selected_printer_name, 
             &self.devices,
             &self.drivers,
             Some(self.selected_device), 
             Some(self.selected_driver),
+            &self.selected_printer_name,
         );
 
         let mut printers = Printers::new(
