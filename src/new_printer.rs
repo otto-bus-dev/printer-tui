@@ -26,8 +26,9 @@ use crate::utils::{
 use crossterm::event::{KeyCode,KeyEvent};
 
 use crate::App;
+
 #[derive(Debug)]
-pub struct Edit<'a> {
+pub struct NewPrinter<'a> {
     pub device_state: TableState,
     pub driver_state: TableState,
     pub selected_block: EditBlock,
@@ -37,9 +38,9 @@ pub struct Edit<'a> {
     pub drivers: &'a Vec<Driver>,
 }
 
-impl<'a> Edit<'a> {
+impl<'a> NewPrinter<'a> {
     pub fn new( selected_block:EditBlock,selected_edit_mode:EditMode,devices: &'a Vec<Device>,drivers: &'a Vec<Driver>,selected_device:Option<usize>,selected_driver:Option<usize>,selected_printer_name:&'a String) -> Self {
-        Edit{
+        NewPrinter {
             device_state: TableState::default()
                 .with_selected(selected_device),
             driver_state: TableState::default()
@@ -54,18 +55,18 @@ impl<'a> Edit<'a> {
 
     pub fn handle_events(app:&mut App,key_event: KeyEvent) {
         match app.selected_edit_mode {
-            EditMode::View => Edit::handle_view_mode(app,key_event),
-            EditMode::Edit => Edit::handle_edit_mode(app,key_event),
+            EditMode::View => NewPrinter::handle_view_mode(app,key_event),
+            EditMode::Edit => NewPrinter::handle_edit_mode(app,key_event),
         }
     }
 
     fn handle_view_mode(app:&mut App, key_event: KeyEvent) {
         match key_event.code {
-            KeyCode::Char('k') => Edit::previous_block(app),
-            KeyCode::Char('j') => Edit::next_block(app),
+            KeyCode::Char('k') => NewPrinter::previous_block(app),
+            KeyCode::Char('j') => NewPrinter::next_block(app),
             KeyCode::Char('e') => app.selected_edit_mode = EditMode::Edit,
             KeyCode::Char('w') => {
-                Edit::write(app);
+                NewPrinter::write(app);
                 app.printers = get_all_printers();
                 app.change_mode(TUIMode::View);
             }
@@ -80,9 +81,9 @@ impl<'a> Edit<'a> {
 
     fn handle_edit_mode(app:&mut App, key_event: KeyEvent) {
         match app.selected_edit_block {
-            EditBlock::Title => Edit::handle_edit_title_mode(app,key_event),
-            EditBlock::Devices => Edit::handle_edit_devices_mode(app,key_event),
-            EditBlock::Drivers => Edit::handle_edit_drivers_mode(app,key_event),
+            EditBlock::Title => NewPrinter::handle_edit_title_mode(app,key_event),
+            EditBlock::Devices => NewPrinter::handle_edit_devices_mode(app,key_event),
+            EditBlock::Drivers => NewPrinter::handle_edit_drivers_mode(app,key_event),
         }   
     }
 
@@ -99,8 +100,8 @@ impl<'a> Edit<'a> {
 
     fn handle_edit_devices_mode(app:&mut App, key_event: KeyEvent) {
         match key_event.code {
-            KeyCode::Char('k') => Edit::previous_device(app),
-            KeyCode::Char('j') => Edit::next_device(app),
+            KeyCode::Char('k') => NewPrinter::previous_device(app),
+            KeyCode::Char('j') => NewPrinter::next_device(app),
             KeyCode::Esc => app.selected_edit_mode = EditMode::View,
             _ => {}
         }
@@ -108,8 +109,8 @@ impl<'a> Edit<'a> {
 
     fn handle_edit_drivers_mode(app:&mut App, key_event: KeyEvent) {
         match key_event.code {
-            KeyCode::Char('k') => Edit::previous_driver(app),
-            KeyCode::Char('j') => Edit::next_driver(app),
+            KeyCode::Char('k') => NewPrinter::previous_driver(app),
+            KeyCode::Char('j') => NewPrinter::next_driver(app),
             KeyCode::Esc => app.selected_edit_mode = EditMode::View,
             _ => {}
         }
