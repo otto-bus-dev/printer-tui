@@ -1,2 +1,0 @@
-iter::adapters::map::Map<vec::into_iter::IntoIter<(String, String)>, {closure@src/properties.rs:35:22: 35:35}>
-Text<'_>: From<std::iter::Map<std::vec::IntoIter<(String, String)>, {closure@src/properties.rs:35:22: 35:35}>>
