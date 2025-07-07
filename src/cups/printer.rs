@@ -39,18 +39,15 @@ pub fn get_all_printers() -> Vec<Printer> {
 }
 
 pub fn create_printer(name: String, device: String, driver: String) {
-   let name_test =name.clone();
-    let device_test = device.clone();//as_ref().expect("test");//"lpd://BRW30C9AB7676AB/BINARY_P1";
-    let driver_test = driver.clone();//as_ref().expect("Backend must be set for printer");
 
     Command::new("lpadmin")
         .arg("-p")
-        .arg(name_test)
+        .arg(name.clone())
         .arg("-E")
         .arg("-v")
-        .arg(device_test)
+        .arg(device.clone())
         .arg("-m")
-        .arg(driver_test)
+        .arg(driver.clone())
         .output().expect("Failed to execute lpstat command check if CUPS is installed");
     
 }

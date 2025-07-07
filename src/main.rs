@@ -12,7 +12,7 @@ mod printers;
 mod cups;
 mod utils;
 mod test_utils;
-use new_printer::Edit;
+use new_printer::NewPrinter;
 use printers::Printers;
 
 use cups::device::Device;
@@ -84,7 +84,7 @@ impl App{
     fn handle_key_event(&mut self, key_event: KeyEvent) {
         match self.mode {
             TUIMode::View => Printers::handle_events(self,key_event),
-            TUIMode::Edit => Edit::handle_events(self,key_event),
+            TUIMode::Edit => NewPrinter::handle_events(self,key_event),
         }
     }
 
@@ -100,7 +100,7 @@ impl App{
 impl Widget for &App {
 
     fn render(self,area: Rect, buf: &mut Buffer) {
-        let mut edit = Edit::new(
+        let mut new_printer= NewPrinter::new(
             self.selected_edit_block,
             self.selected_edit_mode,
             &self.devices,
@@ -128,7 +128,7 @@ impl Widget for &App {
                 printers.render(outer_layout[0], buf);
             }
             TUIMode::Edit => {
-                edit.render(outer_layout[0], buf);
+                new_printer.render(outer_layout[0], buf);
             }
         }
     }
