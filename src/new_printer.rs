@@ -211,6 +211,8 @@ impl<'a> NewPrinter<'a> {
                 instructions_items.push(" Edit Mode ".white());
                 instructions_items.push("<e> ".blue().bold());
                 instructions_items.push(" Quit Add Mode ".white());
+                instructions_items.push("<w> ".blue().bold());
+                instructions_items.push(" Save ".white());
                 instructions_items.push("<Esc> ".blue().bold());
                 instructions_items.push(" Quit ".white());
                 instructions_items.push("<q> ".blue().bold());
